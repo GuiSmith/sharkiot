@@ -10,6 +10,8 @@ function App() {
 
   const [sensores, setSensores] = useState([]);
   const [leituras, setLeituras] = useState([]);
+  const [table, setTable] = useState('');
+  const [idSensor, setIdSensor] = useState(0);
 
   // Buscando sensores
   useEffect(() => {
@@ -33,6 +35,7 @@ function App() {
       });
   }, []);
 
+  // Buscando Leituras
   useEffect(() => {
     if (sensores.length == 0) return;
 
@@ -49,10 +52,42 @@ function App() {
         }
 
         const leituras = await response.json();
-        console.log('Novas leituras: ', leituras);
-        setLeituras((prev) => [...prev, leituras]);
+        setLeituras(leituras);
       })
   }, [sensores]);
+
+  // Tabela
+  useEffect(() => {
+    if (leituras.length == 0) {
+      return;
+    }
+
+    const headers = {
+      id: 'ID',
+      valor: 'Valor',
+      data_ocorrencia: 'Data ocorrência',
+      data_cadastro: 'Data cadastro'
+    };
+
+    setTable(
+      <table className='table table-stripped table-dark table-bordless'>
+        <thead>
+          <tr>
+            {Object.entries(headers).map(([chave, valor]) => <th key={chave}>{valor}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {leituras.map((leitura) => (
+            <tr key={leitura.id}>
+              {Object.keys(headers).map((chave,index) => (
+                <td key={index}>{leitura[chave]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }, [leituras]);
 
   return (
     <section className='mt-3'>
@@ -85,20 +120,7 @@ function App() {
       </article>
       <main className='container mt-4'>
         <h2 className='text-center'>Leituras</h2>
-        <table className='table table-stripped table-light'>
-          <thead>
-            {leituras.length}
-          </thead>
-          <tbody>
-            {leituras.length == 0
-              ? ''
-              : leituras.map((leitura, index) => (
-                <tr id={leitura.id} key={index}>
-
-                </tr>
-              ))}
-          </tbody>
-        </table>
+        {table}
       </main>
       <ToastContainer position="bottom-right" />
     </section>
