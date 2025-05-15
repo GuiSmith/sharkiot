@@ -10,8 +10,20 @@ function App() {
 
   const [sensores, setSensores] = useState([]);
   const [leituras, setLeituras] = useState([]);
+  const [leiturasFiltradas, setLeiturasFiltradas] = useState([]);
   const [table, setTable] = useState('');
-  const [idSensor, setIdSensor] = useState(0);
+  const [qtdBuscas, setQtdBuscas] = useState(0);
+  const [idSensor, setIdSensor] = useState(null);
+
+  // Troca a quantidade de buscas a cada 10s
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log(qtdBuscas + 1);
+      setQtdBuscas(qtd => qtd + 1);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  },[qtdBuscas]);
 
   // Buscando sensores
   useEffect(() => {
@@ -53,12 +65,15 @@ function App() {
 
         const leituras = await response.json();
         setLeituras(leituras);
+        if(idSensor === null){
+          setLeiturasFiltradas(leituras);
+        }
       })
-  }, [sensores]);
+  }, [sensores, qtdBuscas]);
 
   // Tabela
   useEffect(() => {
-    if (leituras.length == 0) {
+    if (leiturasFiltradas.length == 0) {
       return;
     }
 
@@ -77,7 +92,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {leituras.map((leitura) => (
+          {leiturasFiltradas.map((leitura) => (
             <tr key={leitura.id}>
               {Object.keys(headers).map((chave,index) => (
                 <td key={index}>{leitura[chave]}</td>
@@ -87,7 +102,21 @@ function App() {
         </tbody>
       </table>
     );
-  }, [leituras]);
+  }, [leiturasFiltradas]);
+
+  // Definir ID sensor
+  const handleSensorChange = (e) => setIdSensor(e.target.id);
+
+  // Filtrar leituras
+  const filtrarLeituras = (novo_id_sensor) => {
+    const novasLeituras = leituras.filter(leitura => leitura.id_sensor == novo_id_sensor);
+
+    setLeiturasFiltradas(novasLeituras);
+  }
+
+  useEffect(() => {
+    filtrarLeituras(idSensor)
+  },[idSensor,leituras]);
 
   return (
     <section className='mt-3'>
@@ -111,8 +140,8 @@ function App() {
         </div>
         <hr />
         <div className='d-flex justify-content-around'>
-          {sensores.map((sensor, index) => (
-            <button key={index} className='btn btn-dark'>
+          {sensores.map((sensor) => (
+            <button onClick={handleSensorChange} id={sensor.id} key={sensor.id} className='btn btn-dark'>
               {sensor.tipo}
             </button>
           ))}
