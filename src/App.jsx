@@ -91,7 +91,7 @@ function App() {
 
   return (
     <section className='mt-3'>
-      <article className='container alert alert-primary'>
+      <article className='container alert alert-secondary'>
         <h1 className='text-center'>Sensores</h1>
         <div className='row text-center mt-5'>
           {/* Presença */}
@@ -112,7 +112,7 @@ function App() {
         <hr />
         <div className='d-flex justify-content-around'>
           {sensores.map((sensor, index) => (
-            <button key={index} className='btn btn-info'>
+            <button key={index} className='btn btn-dark'>
               {sensor.tipo}
             </button>
           ))}
